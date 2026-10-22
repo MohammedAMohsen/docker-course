@@ -1,0 +1,27 @@
+# الأسرار: نرفع فقط ملفات .env.example
+.env
+.env.*
+!.env.example
+backend.env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.sqlite3
+staticfiles/
+
+# JavaScript
+node_modules/
+dist/
+
+# صور المستخدمين الخاصة في المثال الثاني (تبقى الصورة الافتراضية فقط)
+example-2-django-blog/media/*
+!example-2-django-blog/media/default.png
+
+# المحررات والنظام
+.vscode/
+.idea/
+.DS_Store
+*.log

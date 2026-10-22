@@ -1,0 +1,71 @@
+{% extends "blog/base.html" %}
+{% block content %}
+    <div class="profile-header-card">
+        <div class="profile-cover"></div>
+        <div class="profile-overlay"></div>
+        <div class="profile-header-content">
+            <div class="profile-image-wrapper">
+                <img class="profile-avatar"
+                    src="{{ user_profile.profile.image.url }}"
+                    alt="{{ user.username }}">
+            </div>
+            <div class="profile-details">
+                <h1 class="profile-name">{{ user_profile.username }}</h1>
+                <p class="profile-email">{{ user_profile.email }}</p>
+                <div class="profile-bottom-row">
+                    <div class="profile-stats">
+                        <div class="stat-box">
+                            <span class="stat-number">{{ page_obj.paginator.count }}</span>
+                            <span class="stat-label">Posts</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-number">1.2K</span>
+                            <span class="stat-label">Followers</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-number">320</span>
+                            <span class="stat-label">Following</span>
+                        </div>
+                    </div>
+                    {% if user_profile != user %}
+                        <button class="follow-btn">+ Follow</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% for post in posts %}
+        <article class="media content-section">
+            <img class="rounded-circle article-img" src="{{ post.author.profile.image.url }}">
+            <div class="media-body">
+                <div class="article-metadata">
+                    <a class="mr-2" href="{% url 'user-post' post.author.username %}">{{ post.author }}</a>
+                    <small class="text-muted">{{ post.date_posted|date:"F d, Y" }}</small>
+                </div>
+                <h2><a class="article-title" href="{% url 'post-detail' post.id %}">{{ post.title }}</a></h2>
+                <p class="article-content">{{ post.content }}</p>
+            </div>
+        </article>
+    {% endfor %}
+    {% if is_paginated %}
+
+        {% if page_obj.has_previous %}
+            <a class="btn btn-outline-info mb-4" href="?page=1">First</a>
+            <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <a class="btn btn-info mb-4" href="?page={{ num }}">{{ num }}</a>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'+3' %}
+                <a class="btn btn-outline-info mb-4" href="?page={{ num }}">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.next_page_number }}">Next</a>
+            <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+        {% endif %}
+
+    {% endif %}
+{% endblock content %}

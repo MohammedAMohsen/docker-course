@@ -1,0 +1,69 @@
+# المثال السابع: تشغيل المشروع من صور جاهزة على Docker Hub
+#
+# الفرق عن المثال السادس:
+#   1) لا يوجد build هنا، فكل خدمة تسحب صورة جاهزة بالمفتاح image.
+#      لذلك لا نحتاج كود المشروع على الجهاز، يكفي هذا الملف وملفّا المتغيّرات.
+#   2) لا توجد كلمات مرور مكتوبة في الملف.
+#      الصيغة ${POSTGRES_DB} يعوّضها Compose من ملف .env الموجود بجانب هذا الملف.
+
+services:
+
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    # لا يوجد ports هنا: القاعدة لا تُفتح على الجهاز، فقط الخدمات الأخرى تصل إليها داخل الشبكة.
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  migrate:
+    image: mohammed7845/workboard-backend:latest
+    # إعدادات Django من ملف backend.env
+    env_file:
+      - ./backend.env
+    # بيانات القاعدة من ملف .env، فتُكتب مرة واحدة فقط لكل الخدمات.
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+    command: python manage.py migrate
+    depends_on:
+      db:
+        condition: service_healthy
+    # لا تُعِد تشغيل هذه الخدمة بعد أن تنتهي. هذه هي القيمة الافتراضية، وكتبناها للوضوح.
+    restart: "no"
+
+  backend:
+    image: mohammed7845/workboard-backend:latest
+    env_file:
+      - ./backend.env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+    ports:
+      - "8001:8000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  frontend:
+    image: mohammed7845/workboard-frontend:latest
+    ports:
+      - "3001:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

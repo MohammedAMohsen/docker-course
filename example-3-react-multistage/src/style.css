@@ -1,0 +1,221 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap');
+
+:root {
+  font-family: "IBM Plex Sans Arabic", system-ui, sans-serif;
+  color: #f3f4f6;
+  background: #0b1020;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 15% 10%, rgba(76, 110, 245, .17), transparent 34rem),
+    radial-gradient(ellipse at 90% 45%, rgba(16, 185, 129, .09), transparent 28rem),
+    #0b1020;
+}
+
+button, input { font: inherit; }
+button { cursor: pointer; }
+
+.page {
+  width: min(100% - 40px, 860px);
+  margin: 0 auto;
+}
+
+.topbar {
+  height: 86px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255,255,255,.09);
+  color: #e5e7eb;
+  font-weight: 700;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: linear-gradient(140deg, #818cf8, #4f46e5);
+  color: white;
+  font-size: 22px;
+}
+
+.status {
+  margin-right: auto;
+  color: #a7f3d0;
+  background: rgba(16,185,129,.1);
+  border: 1px solid rgba(16,185,129,.22);
+  border-radius: 999px;
+  padding: 6px 11px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status i {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 5px;
+  border-radius: 50%;
+  background: #34d399;
+}
+
+.hero { padding: 62px 0 34px; }
+
+.eyebrow {
+  color: #a5b4fc;
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0 0 12px;
+}
+
+h1 {
+  font-size: clamp(38px, 7vw, 62px);
+  line-height: 1.25;
+  letter-spacing: -1.8px;
+  margin: 0;
+}
+
+h1 span { color: #a5b4fc; }
+
+.intro {
+  color: #a5aec3;
+  line-height: 1.9;
+  max-width: 560px;
+  margin: 18px 0 26px;
+}
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.stat {
+  min-width: 135px;
+  padding: 14px 18px;
+  background: rgba(255,255,255,.045);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 14px;
+}
+
+.stat strong { display: block; font-size: 25px; }
+.stat span { color: #9ca3af; font-size: 12px; }
+
+.task-card {
+  background: rgba(20, 27, 46, .86);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 22px;
+  padding: 26px;
+  box-shadow: 0 24px 70px rgba(0,0,0,.18);
+}
+
+.card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.card-heading .eyebrow { margin-bottom: 3px; }
+h2 { font-size: 24px; margin: 0; }
+
+.task-count {
+  color: #c7d2fe;
+  background: rgba(99,102,241,.16);
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.add-form { display: flex; gap: 10px; }
+
+.add-form input {
+  min-width: 0;
+  flex: 1;
+  color: #f9fafb;
+  background: #0d1425;
+  border: 1px solid #303a52;
+  border-radius: 12px;
+  padding: 12px 14px;
+  outline: none;
+}
+
+.add-form input:focus { border-color: #818cf8; }
+
+.add-form button {
+  color: white;
+  background: #6366f1;
+  border: 0;
+  border-radius: 12px;
+  padding: 0 16px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.add-form button:hover { background: #4f46e5; }
+
+.task-list {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0 0;
+}
+
+.task {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 0;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+
+.task:last-child { border-bottom: 0; }
+
+.check {
+  flex: 0 0 23px;
+  width: 23px;
+  height: 23px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #59647d;
+  border-radius: 7px;
+  background: transparent;
+  color: white;
+  padding: 0;
+}
+
+.done .check { background: #10b981; border-color: #10b981; }
+.task > span { flex: 1; font-size: 14px; }
+.task.done > span { color: #7f8aa3; text-decoration: line-through; }
+.task small { color: #9ca3af; font-size: 11px; }
+.done small { color: #6ee7b7; }
+
+.hint { color: #7f8aa3; font-size: 12px; line-height: 1.8; margin: 17px 0 0; }
+
+footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 26px 2px 35px;
+  color: #68748c;
+  font-size: 12px;
+}
+
+@media (max-width: 560px) {
+  .page { width: min(100% - 24px, 860px); }
+  .hero { padding-top: 42px; }
+  .task-card { padding: 18px; }
+  .add-form { flex-direction: column; }
+  .add-form button { min-height: 44px; }
+  .task small { display: none; }
+  footer { flex-direction: column; gap: 5px; }
+}

@@ -1,0 +1,99 @@
+# ملف Docker Compose: يصف كل خدمات المشروع في مكان واحد.
+# بدل سبعة أوامر يدوية كما في المثال الخامس، يكفي أمر واحد:
+#     docker compose up -d --build
+#
+# ينشئ Compose تلقائياً شبكة خاصة بالمشروع ويضع فيها كل الخدمات.
+# داخل هذه الشبكة، اسم الخدمة (db أو backend) يعمل كعنوان.
+
+services:
+
+  # ===== قاعدة البيانات =====
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: nawa_tasks
+      POSTGRES_USER: nawa_user
+      # يجب أن تطابق POSTGRES_PASSWORD في ملف backend/.env
+      # في المثال السابع ننقلها إلى ملف .env حتى لا نكتبها مرتين.
+      POSTGRES_PASSWORD: password
+    ports:
+      # اختياري: فقط للاتصال بالقاعدة من برنامج إدارة قواعد البيانات على الجهاز.
+      - "5444:5432"
+    volumes:
+      # مساحة تخزين مسمّاة، معرّفة في آخر الملف، حتى لا تضيع البيانات.
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      # الأمر pg_isready ينجح فقط عندما تصبح القاعدة جاهزة لاستقبال الاتصالات.
+      # يكرّره Compose كل خمس ثوانٍ، وبعد خمس محاولات فاشلة يعدّ الخدمة غير سليمة.
+      test: ["CMD-SHELL", "pg_isready -U nawa_user -d nawa_tasks"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ===== خدمة لمرة واحدة: تطبيق الترحيلات =====
+  # تعمل بعد أن تصبح القاعدة سليمة، تنفّذ أمر الترحيل ثم تنتهي.
+  migrate:
+    build: ./backend
+    image: workboard-migrate:latest
+    env_file:
+      - ./backend/.env
+    # القيم في environment تتغلّب على القيم نفسها في env_file.
+    # في ملف backend/.env القيمة workboard، وهي اسم الحاوية في التشغيل اليدوي.
+    # هنا نغيّرها إلى db، وهو اسم خدمة القاعدة في هذا الملف.
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+    # يستبدل الأمر الافتراضي المكتوب في Dockerfile.
+    command: python manage.py migrate
+    depends_on:
+      db:
+        # لا تبدأ قبل أن ينجح فحص الصحة في خدمة db.
+        condition: service_healthy
+
+  # ===== الخلفية: Django =====
+  backend:
+    build: ./backend
+    # اسم واضح للصورة، بدل الاسم الطويل الذي ينشئه Compose من اسم المجلد واسم الخدمة.
+    image: workboard-backend:latest
+    # يمكن أيضاً تسمية الحاوية بالمفتاح container_name، لكنه غير محبّذ:
+    # الاسم الثابت يمنع تشغيل أكثر من نسخة من الخدمة، ويتعارض مع أي مشروع آخر يستخدمه.
+    env_file:
+      - ./backend/.env
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+    ports:
+      # اختياري: للوصول إلى Django مباشرة. المتصفح يصل إليه عادةً عبر الواجهة على 3001.
+      - "8001:8000"
+    depends_on:
+      migrate:
+        # لا تبدأ إلا بعد أن تنتهي خدمة الترحيل بنجاح.
+        condition: service_completed_successfully
+
+  # ===== الواجهة: React داخل Nginx =====
+  frontend:
+    build: ./frontend
+    image: workboard-frontend:latest
+    ports:
+      - "3001:80"
+    depends_on:
+      # هنا يكفي ترتيب البدء فقط، بلا شرط.
+      - backend
+
+# تعريف مساحات التخزين المسمّاة المستخدمة في الخدمات.
+# الاسم الفعلي يصبح: example-6-fullstack-compose_postgres_data
+# أي اسم المشروع (اسم المجلد) ثم اسم مساحة التخزين.
+volumes:
+  postgres_data:
+
+
+# طريقة التشغيل:
+#
+# docker compose config          التأكد من صحة الملف وعرضه بعد تعويض المتغيّرات
+# docker compose up -d --build   بناء الصور المطلوبة ثم تشغيل الخدمات في الخلفية
+# docker compose ps -a           حالة كل الخدمات، ومنها migrate بعد أن تنتهي
+# docker compose logs -f backend متابعة سجلات خدمة واحدة
+# docker compose down            إيقاف الخدمات وحذف الحاويات والشبكة، مع بقاء البيانات
+#
+# ملاحظة: الخدمتان migrate و backend تبنيان الصورة نفسها مرتين باسمين مختلفين.
+# البناء الثاني سريع لأنه يأخذ كل الطبقات من ذاكرة البناء المؤقتة.
